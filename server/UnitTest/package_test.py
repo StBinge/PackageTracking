@@ -1,3 +1,4 @@
+import Databse.Package as Package
 from unittest import TestCase, main
 import datetime
 import help
@@ -5,7 +6,6 @@ import help
 import pathlib
 import sys
 sys.path.append(str(pathlib.Path(__file__).absolute().parent.parent))
-import Databse.Package as Package
 
 
 def create_code():
@@ -20,8 +20,8 @@ def create_random_content():
 class PackageTest(TestCase):
     def test_create_code(self):
         for _ in range(10):
-            code=create_code()
-            self.assertTrue(len(code)==17,code)
+            code = create_code()
+            self.assertTrue(len(code) == 17, code)
 
     def test_add(self):
 
@@ -29,29 +29,33 @@ class PackageTest(TestCase):
         content = create_random_content()
         id = Package.add_package(code, content)
         added = Package.get_package_by_id(id)
-        self.assertTrue(added and added.code ==code and added.content == content,id)
+        self.assertTrue(added and added.code ==
+                        code and added.content == content, id)
         id = Package.add_package(code, content)
-        self.assertTrue(id == -1,id)
+        self.assertTrue(id == -1, id)
 
     def test_post_package(self):
         packages = Package.get_all_packages()
         for pack in packages:
-            state=pack.posted
-            self.assertTrue(Package.post_package(pack.code),pack.id)
-            self.assertTrue(Package.get_package_by_id(pack.id).posted,pack.id)
-            self.assertTrue(Package.post_package(pack.code,False),pack.id)
-            self.assertFalse(Package.get_package_by_id(pack.id).posted,pack.id)
-            Package.post_package(pack.code,state)
+            state = pack.posted
+            self.assertTrue(Package.add_package(pack.code), pack.id)
+            self.assertTrue(Package.get_package_by_id(pack.id).posted, pack.id)
+            self.assertTrue(Package.add_package(pack.code, False), pack.id)
+            self.assertFalse(Package.get_package_by_id(
+                pack.id).posted, pack.id)
+            Package.add_package(pack.code, state)
 
     def test_sign_package(self):
         packages = Package.get_all_packages()
         for pack in packages:
-            state=pack.signed
-            self.assertTrue(Package.sign_package(pack.code),pack.id)
-            self.assertTrue(Package.get_package_by_id(pack.id).signed,pack.id)
-            self.assertTrue(Package.sign_package(pack.code,False),pack.id)
-            self.assertFalse(Package.get_package_by_id(pack.id).signed,pack.id)
-            Package.sign_package(pack.code,state)
+            state = pack.signed
+            self.assertTrue(Package.set_package_signed(pack.code), pack.id)
+            self.assertTrue(Package.get_package_by_id(pack.id).signed, pack.id)
+            self.assertTrue(Package.set_package_signed(
+                pack.code, False), pack.id)
+            self.assertFalse(Package.get_package_by_id(
+                pack.id).signed, pack.id)
+            Package.set_package_signed(pack.code, state)
 
 
 if __name__ == '__main__':

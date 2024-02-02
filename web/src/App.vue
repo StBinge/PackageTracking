@@ -1,24 +1,21 @@
 <script setup lang="ts">
-import { ref,computed } from 'vue';
-import Main from './components/Main.vue';
-
-const components={
-  'main':Main
-}
-
-const active_component_name=ref('main')
+import { onMounted } from 'vue';
+import {useRouter} from 'vue-router'
+import { useMessage } from 'naive-ui';
+import { add_bad_request_hanlder } from './components/Request';
+const router=useRouter()
 
 
+onMounted(()=>{
+  add_bad_request_hanlder(401,async (res)=>{
+    const message=useMessage()
+    message.warning(await res.text())
+    router.push({name:'login'})
 
-const show_scanner=ref(false)
-
-const qrcode=ref('')
-
-function accpet_qrcode(code:string){
-  qrcode.value=code
-  show_scanner.value=false
-}
-
+  })
+  router.push({name:'login'})
+  // router.push({name:'transfer',params:{'mode':'post'}})
+})
 
 </script>
 
@@ -28,14 +25,8 @@ function accpet_qrcode(code:string){
       <div class="header">
         <h1>物流信息系统</h1>
       </div>
-      <component :is="components[active_component_name]"></component>
+      <router-view></router-view>
     </div>
-      <teleport to="body">
-        <Scanner 
-        v-show="show_scanner" 
-        @close="show_scanner=false"
-        @ok="accpet_qrcode"></Scanner>
-      </teleport>
   </n-message-provider>
 </template>
 
@@ -48,7 +39,7 @@ function accpet_qrcode(code:string){
   height: 100%;
   width: 100%;
   grid-template-columns: 1fr;
-  background-color: #333;
+  background-color: #111;
 }
 .header{
   background-color: dodgerblue;

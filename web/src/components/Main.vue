@@ -1,17 +1,19 @@
 <script setup lang="ts">
-
+import {useRouter} from 'vue-router'
+const router=useRouter()
 </script>
 
 <template>
-<div class="main-container">
-    <n-button  size="large" type="primary">发送包裹</n-button>
-    <n-button  size="large" type="primary">中转包裹</n-button>
-    <n-button  size="large" type="primary">签收包裹</n-button>
+<div class="menu-container">
+    <button>查看包裹</button>
+    <button @click="router.push({name:'transfer',params:{'mode':'post'}})">发送包裹</button>
+    <button @click="router.push({name:'transfer',params:{'mode':'transfer'}})">中转包裹</button>
+    <button>签收包裹</button>
 </div>
 </template>
 
 <style scoped>
-.main-container{
+.menu-container{
     display:flex;
     flex-direction: column;
     justify-content: center;

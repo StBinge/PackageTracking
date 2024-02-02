@@ -1,26 +1,27 @@
 from tinydb import TinyDB, Query
 from tinydb.table import Document
+# from pydantic import BaseModel
 
 DB = TinyDB('user.json')
 
 
-class User:
+class User():
     id: int
     name: str
     password: str
     realname: str
 
     def __init__(self, document: Document) -> None:
-        self.name = document['name']
         self.id = document.doc_id
+        self.name = document['name']
         self.password = document['password']
         self.realname = document['realname']
 
 
-def add_user(name, password, nickname):
+def add_user(name, password, realname):
     if check_user_exits(name):
         return -1
-    return DB.insert({'name': name, 'password': password, 'realname': nickname})
+    return DB.insert({'name': name, 'password': password, 'realname': realname})
 
 
 def validate_user(name,password):
@@ -37,6 +38,8 @@ def check_user_exits(name):
 
 
 def get_user_by_id(id) -> User:
+    if id<0:
+        return None
     doc=DB.get(doc_id=id)
     if not doc:
         return None

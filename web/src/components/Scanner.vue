@@ -1,65 +1,61 @@
 <script setup lang="ts">
-import { onMounted, defineEmits, onUpdated,onBeforeUnmount } from 'vue'
+import { onMounted, defineEmits,onBeforeUnmount,ref } from 'vue'
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode'
 import { useMessage } from 'naive-ui'
 import { validate_code } from './QRCode'
-import { useScannerStore } from '../store'
+// import { useScannerStore } from '../store'
 
 const emits = defineEmits<{
     (event: 'close'): void,
     (event: 'ok', code: string): void,
 }>()
 const message = useMessage()
-const store = useScannerStore()
+// const store = useScannerStore()
 
-// const scanner=ref<Html5Qrcode>()
+const scanner=ref<Html5Qrcode>()
 
-// const camera_id=ref<string>('')
+const camera_id=ref<string>('')
 
 onMounted(async () => {
     // validate_code('20240129150396123')
     try {
-        await setup_scanner()
-        // await start_scan()
+        // await setup_scanner()
+        await start_scan()
     } catch (error) {
-        message.error('Start Scanner failed!')
+        message.error('启动扫码功能失败!')
         console.error('Failed start scanner!', error)
     }
 })
 
-onUpdated(async () => {
-    try {
-            // console.log('active scanner')
-            // await setup_scanner()
-            await start_scan()
-        } catch (error) {
-            message.error('Start Scanner failed!')
-            console.error('Failed start scanner!', error)
-        }
-})
+// onUpdated(async () => {
+//     try {
+//             // console.log('active scanner')
+//             // await setup_scanner()
+//             await start_scan()
+//         } catch (error) {
+//             message.error('Start Scanner failed!')
+//             console.error('Failed start scanner!', error)
+//         }
+// })
 
 onBeforeUnmount(async ()=>{
     await stop_scanner()
 })
 
 async function setup_scanner() {
-    if (!store.cameraId) {
-        store.cameraId = await getCameraID()
+    if (!camera_id.value) {
+        camera_id.value = await getCameraID()
     }
-    if (!store.scanner) {
-        store.scanner = new Html5Qrcode('reader')
+    if (!scanner.value) {
+        scanner.value = new Html5Qrcode('reader')
     }
     // window.$scanner=scanner.value
 }
 
 async function getCameraID() {
-    // if (window.$cameraId) {
-    //     camera_id.value=window.$cameraId
-    //     return
-    // }
     const devices = await Html5Qrcode.getCameras()
     if (!devices) {
-        message.error('No camera found!')
+        message.error('未检测到摄像头!')
         return ''
     }
     if (devices.length > 1) {
@@ -74,66 +70,64 @@ async function getCameraID() {
 
 
 
-function scann_ok(decode_text: string) {
+async function  scann_ok(decode_text: string) {
+    console.debug('Code Scanned:',decode_text)
     if (validate_code(decode_text)) {
-        console.log('Read code:', decode_text)
-        pause_scanner()
+        console.log('Valid Code:', decode_text)
+        // pause_scanner()
+        await stop_scanner()
         emits('ok', decode_text)
     } else {
-        message.warning('Invalidate QRCode!')
+        message.warning('无效二维码!')
     }
 }
 
-// function scan_fail(error:string){
-
-//     console.error(error)
-// }
-
 async function start_scan() {
-    const state = store.scanner_state
+    await setup_scanner()
+    const state=scanner.value?.getState()
     if (state==Html5QrcodeScannerState.SCANNING) return
-    const scanner = store.scanner
     switch (state) {
         case Html5QrcodeScannerState.PAUSED:
-            scanner?.resume()
+            scanner.value?.resume()
             break;
         case Html5QrcodeScannerState.NOT_STARTED:
-            await setup_scanner()
-            await store.scanner?.start(
-                store.cameraId,
+            await scanner.value?.start(
+                camera_id.value,
                 {
                     fps: 10,
                     qrbox: { width: 250, height: 250 },
                 },
                 scann_ok,
-                undefined
+                (err)=>console.debug(err)
             )
             break
         default:
             throw 'Unknown Scanner State!'
-            break;
     }
 }
 
 async function stop_scanner() {
-    const scanner=store.scanner
-    const state=scanner?.getState()
+    if (!scanner.value) return 
+    const state=scanner.value?.getState()
     if (state==Html5QrcodeScannerState.SCANNING || state==Html5QrcodeScannerState.PAUSED) {
-        await scanner?.stop()
+        await scanner.value?.stop()
     }
 
 }
 
-function pause_scanner(){
-    const scanner=store.scanner
-    const state=scanner?.getState()
-    if (state==Html5QrcodeScannerState.SCANNING) {
-        scanner?.pause(true)
-    }
-}
+// function pause_scanner(){
+//     if (!scanner.value) {
+//         return
+//     }
+//     const state=scanner.value?.getState()
+//     if (state==Html5QrcodeScannerState.SCANNING) {
+//         scanner.value?.pause(true)
+//     }
+// }
 
 async function quit() {
-    pause_scanner() 
+    // pause_scanner() 
+    await stop_scanner()
     emits('close')
 }
 

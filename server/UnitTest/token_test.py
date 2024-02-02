@@ -5,7 +5,7 @@ import pathlib,datetime
 import sys
 sys.path.append(str(pathlib.Path(__file__).absolute().parent.parent))
 import Databse.Token as Token
-import Databse.User as User
+import Databse.UserDB as UserDB
 
 class TokenTest(TestCase):
     def test_token_validation(self):
@@ -19,7 +19,7 @@ class TokenTest(TestCase):
             break
 
     def test_add_token(self):
-        for user in User.get_all_users():
+        for user in UserDB.get_all_users():
             tid=Token.add_token(user.id)
             self.assertTrue(tid>=0,tid)
             token=Token.get_token_by_id(tid)
