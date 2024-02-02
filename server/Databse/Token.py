@@ -67,3 +67,6 @@ def get_token_by_id(id):
 
 def get_all_tokens():
     return [Token(doc) for doc in DB.all()]
+
+def remove_token(token):
+    return len(DB.remove(Query().uuid==token))>0

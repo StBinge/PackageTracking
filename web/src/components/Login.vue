@@ -3,10 +3,12 @@ import { ref,computed,defineEmits,onMounted } from 'vue'
 import {sign_in,sign_up,check_token} from './User'
 import { useMessage } from 'naive-ui';
 import {useRouter} from 'vue-router'
+import {useUserStore} from '../store'
 
 
 const router=useRouter()
 const message=useMessage()
+const user=useUserStore()
 const emits=defineEmits<{
     (event:'sign_in'):void,
 }>()
@@ -19,24 +21,25 @@ const user_realname=ref('')
 const can_sign_in=computed(()=>user_name.value.length>0 && user_password.value.length>0)
 const can_sign_up=computed(()=>!!user_name.value && !!user_password.value && !!user_realname.value)
 
-onMounted(async()=>{
-    try {
+// onMounted(async()=>{
+//     try {
         
-        const valid=await check_token()
-        if (valid){
-            console.log('Token is valid, skip login.')
-            emits('sign_in')
-            router.push({name:'main'})
-        }
-    } catch (error) {
-        console.warn('Check token error!',error)
-    }
-})
+//         const valid=await check_token()
+//         if (valid){
+//             console.log('Token is valid, skip login.')
+//             emits('sign_in')
+//             router.push({name:'main'})
+//         }
+//     } catch (error) {
+//         console.warn('Check token error!',error)
+//     }
+// })
 
 async function try_sign_in(){
     try {
         await sign_in(user_name.value,user_password.value)
         message.success('登录成功')
+        user.logined=true
         emits('sign_in')
         router.push({name:'main'})
 
@@ -49,6 +52,7 @@ async function try_sign_up(){
     try {
         await sign_up(user_name.value,user_password.value,user_realname.value)
         message.success('注册成功')
+        user.logined=true
         emits('sign_in')
         router.push({name:'main'})
 
@@ -101,12 +105,11 @@ async function try_sign_up(){
 .login-box{
     display: grid;
     grid-template-rows: auto 1fr;
-    /* background-color: rgba(255, 255, 255, 0.3); */
-    /* border:1px solid dodgerblue;
-    border-radius: 5px; */
+    border-radius: 10px;
     padding: 0;
-    /* box-sizing:content-box; */
+    border: 2px solid dodgerblue;
     grid-template-columns: 1fr;
+    overflow: hidden;
 }
 .switch{
     width: 100%;
@@ -119,17 +122,16 @@ async function try_sign_up(){
     padding: 5px 20px;
     font-size: 1.2rem;
     font-weight: bold;
-    border:1px solid dodgerblue;
     text-align: center;
     color: white;
-}
-.option.active{
-    background-color: dodgerblue;
-    color:white;
+    background-color: gray;
     text-shadow: 1px 1px black;
 }
+.option.active{
+    color:white;
+    background-color: dodgerblue;
+}
 .form{
-    border: 1px solid dodgerblue;
     border-top: 0;
     display: flex;
     flex-direction: column;

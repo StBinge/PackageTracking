@@ -59,3 +59,10 @@ async def check_token(x_token:str=Header()):
         raise HTTPException(401, '登录令牌不存在, 或者已经过期!')
     return x_token
 
+@router.get('/signout')
+async def sign_out(x_token:str=Header()):
+    if not x_token or Token.get_token_userID(x_token) < 0:
+        raise HTTPException(401, '登录令牌不存在, 或者已经过期!')
+    if Token.remove_token(x_token):
+        return Response()
+    raise HTTPException(500,'注销操作失败!')

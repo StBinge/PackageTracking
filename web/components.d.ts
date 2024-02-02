@@ -8,11 +8,15 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     copy: typeof import('./src/components/template copy.vue')['default']
+    Header: typeof import('./src/components/Header.vue')['default']
     Login: typeof import('./src/components/Login.vue')['default']
     Main: typeof import('./src/components/Main.vue')['default']
     Menu: typeof import('./src/components/Menu.vue')['default']
     Message: typeof import('./src/components/Message.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
+    NChe: typeof import('naive-ui')['NChe']
+    NCheck: typeof import('naive-ui')['NCheck']
+    NCheckbox: typeof import('naive-ui')['NCheckbox']
     NInput: typeof import('naive-ui')['NInput']
     NInputButton: typeof import('naive-ui')['NInputButton']
     NInputGroup: typeof import('naive-ui')['NInputGroup']
@@ -21,6 +25,7 @@ declare module 'vue' {
     NModal: typeof import('naive-ui')['NModal']
     NRadioButton: typeof import('naive-ui')['NRadioButton']
     NRadioGroup: typeof import('naive-ui')['NRadioGroup']
+    NSelect: typeof import('naive-ui')['NSelect']
     Package: typeof import('./src/components/Package.vue')['default']
     Post: typeof import('./src/components/Post.vue')['default']
     PostPackage: typeof import('./src/components/PostPackage.vue')['default']

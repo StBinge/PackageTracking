@@ -51,11 +51,32 @@ export async function get_package_info(code:string,with_records:boolean=false){
     }
 }
 
-export async function post_package(package_code:string,package_content:string,location:string) {
+interface PackagePost{
+    package_code:string
+    package_content:string
+    location:string
+    package_comment:string
+}
+
+
+export async function post_package(data:PackagePost) {
     const api='/api/package/post'
-    const res= await Post(api,{package_code,package_content,location})
+    const res= await Post(api,data)
     if (res.ok){
         return true
     }
-    throw new Error((await res.json()).detail)
+    throw (await res.json()).detail
+}
+
+interface PackageTransfer{
+    package_code:string
+    package_status:string
+    package_comment:string
+    location:string
+    signed:boolean
+}
+export async function transfer_package(data:PackageTransfer){
+    const res=await Post('/api/package/transfer',data)
+    if (res.ok) return true
+    throw (await res.json()).detail
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onMounted,ref,computed,watch} from 'vue'
 import {useRoute} from 'vue-router'
-import {get_location,post_package,get_package_info} from './Package'
+import {get_location,post_package,get_package_info,transfer_package} from './Package'
 import Scanner from './Scanner.vue';
 import {validate_code} from './QRCode'
 import { useMessage } from 'naive-ui';
@@ -10,16 +10,37 @@ const route=useRoute()
 const message=useMessage()
 const package_code=ref('')
 const package_content=ref('')
+const package_status=ref('')
+const package_comment=ref('')
+const package_signed=ref(false)
 const location=ref('')
 const show_scanner=ref(false)
-
-const can_transfer=computed(()=>validate_code(package_code.value) && !!package_content.value && !! location.value)
+const status_options=[
+    {
+        label:'完整',
+        value:'完整',
+    },
+    {
+        label:'损坏',
+        value:'损坏',
+    },
+    {
+        label:'丢失',
+        value:'丢失',
+    },
+]
+const can_transfer=computed(()=>{
+    if (route.params.mode=='post'){
+        return validate_code(package_code.value) && !!package_content.value && !! location.value
+    }else{
+        return validate_code(package_code.value) && !!package_content.value && !! location.value && !!package_status.value
+    }
+})
 
 const botton_text=computed(()=>{
     return {
     'post':'发送包裹',
     'transfer':'中转包裹',
-    'sign':'签收包裹',
 }[route.params.mode as string]
 })
 
@@ -34,7 +55,7 @@ const code_state=computed(()=>{
     }
 })
 
-const can_edit_content=computed(()=>route.params.mode=='post')
+// const can_edit_content=computed(()=>route.params.mode=='post')
 
 onMounted(async ()=>{
     console.debug('Transfer Mode:',route.params.mode)
@@ -75,24 +96,52 @@ function get_error_msg(error:any|unknown){
     return ''+error
 }
 
-async function transfer_package(){
+async function try_transfer_package(){
     const mode=route.params.mode
     switch (mode) {
         case 'post':
             try {
-                await post_package(package_code.value,package_content.value,location.value)
+                await post_package({
+                    package_code:package_code.value,
+                    package_content:package_content.value,
+                    location:location.value,
+                    package_comment:package_comment.value
+                })
                 message.success('发送包裹成功!')
+                reset_all_inputs()
             } catch (error) {
                 message.warning(`发送包裹失败:${get_error_msg(error)}`)
                 console.error(error)
             }
             break;
-    
+        case 'transfer':
+            try {
+                await transfer_package({
+                    package_code:package_code.value,
+                    location:location.value,
+                    package_comment:package_comment.value,
+                    package_status:package_status.value,
+                    signed:package_signed.value
+                })
+                message.success('中转包裹成功!')
+                reset_all_inputs()
+            } catch (error) {
+                message.warning('中转包裹失败:'+error)
+            }
+            break
         default:
+            message.error('未指定中转模式!')
             break;
     }
 }
 
+function reset_all_inputs(){
+    package_code.value=''
+    package_content.value=''
+    package_comment.value=''
+    package_status.value=''
+    package_signed.value=false
+}
 </script>
 
 <template>
@@ -106,16 +155,28 @@ async function transfer_package(){
         <n-input-group>
             <n-input-group-label>包裹内容</n-input-group-label>
             <n-input 
-            :disabled="!can_edit_content"
             v-model:value="package_content"></n-input>
         </n-input-group>
         <n-input-group>
-            <n-input-group-label>发送地点</n-input-group-label>
+            <n-input-group-label>所在地点</n-input-group-label>
             <n-input v-model:value="location"></n-input>
+        </n-input-group>
+        <n-input-group v-if="route.params.mode=='transfer'">
+            <n-input-group-label>包裹状态</n-input-group-label>
+            <n-select v-model:value="package_status" :options="status_options" default-value="完整"></n-select>
+        </n-input-group>
+        <n-input-group>
+            <n-input-group-label>包裹备注</n-input-group-label>
+            <n-input v-model:value="package_comment"></n-input>
+        </n-input-group>
+        <n-input-group v-if="route.params.mode=='transfer'">
+            <n-checkbox 
+            v-model:checked="package_signed" 
+            size="large">签收包裹</n-checkbox>
         </n-input-group>
         <n-button 
         size="large"
-        @click="transfer_package()"
+        @click="try_transfer_package()"
         :disabled="!can_transfer"
         type="primary">{{ botton_text }}</n-button>
     </div>
@@ -142,12 +203,5 @@ async function transfer_package(){
     display: flex;
     flex-direction: column;
     gap:20px;
-}
-.form-title{
-    width: 100%;
-    background-color: dodgerblue;
-    color:aliceblue;
-    text-shadow: 1px 1px black;
-    text-align: center;
 }
 </style>
