@@ -17,6 +17,7 @@ class Record:
     def __init__(self,document:Document) -> None:
         self.id=document.doc_id
         self.package_id=document['package_id']
+        self.user_id=document['user_id']
         self.location=document['location']
         self.datetime=document['datetime']
         self.status=document['status']

@@ -1,12 +1,16 @@
 import { Post,Get } from "./Request"
-interface Record{
+export interface Record{
     user:string
     location:string
     datetime:string
+    status:string
+    comment:string
 }
-interface PackageInfo{
+export interface PackageInfo{
     code:string
     content:string
+    posted:boolean
+    signed:boolean
     records:Record[]
 }
 export function get_location(){
@@ -44,7 +48,9 @@ export async function get_package_info(code:string,with_records:boolean=false){
     const api='/api/package'
     const res=await Get(api,{'code':code,'full':with_records})
     if (res.ok) {
-        return await res.json() as PackageInfo
+        const info= await res.json() as PackageInfo
+        console.debug('Get package info:',info)
+        return info
     }else{
         console.debug('Get package info failed:',await res.text())
         return null

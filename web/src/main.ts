@@ -11,14 +11,24 @@ const routes=[
     component:()=>import('@/components/Main.vue')
 },
 {
-    path:'/login',
+    path:'/user/login',
     name:'login',
     component:()=>import('@/components/Login.vue')
 },
 {
-    path:'/transfer/:mode',
+    path:'/package/transfer/:mode',
     name:'transfer',
     component:()=>import('@/components/Transfer.vue'),
+},
+{
+    path:'/package/transfer/:mode',
+    name:'transfer',
+    component:()=>import('@/components/Transfer.vue'),
+},
+{
+    path:'/package/info',
+    name:'info',
+    component:()=>import('@/components/PackageInfo.vue'),
 }
 ]
 const pinia=createPinia()

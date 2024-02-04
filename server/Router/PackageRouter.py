@@ -1,42 +1,19 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
 from Databse import Package, Record, UserDB
 from Dependency import get_userID
-from typing import Optional,Annotated
+from Router import RequestModel,ResponseModel
+
+def convert_record(record:Record.Record):
+    return ResponseModel.RecordItem(
+        user=UserDB.get_user_by_id(record.user_id).name,
+        location=record.location,
+        datetime=record.datetime,     
+        status=record.status,
+        comment=record.comment
+    )
 
 
-class NewPackageItem(BaseModel):
-    code: str
-    content: str
 
-
-class NewPostItem(BaseModel):
-    package_code: str
-    package_content: str
-    location: str
-    package_comment: Optional[str]
-
-
-class NewTransferItem(BaseModel):
-    package_code: str
-    location: str
-    package_status: str
-    package_comment: Optional[str]
-    signed: bool
-
-
-class RecordItem(BaseModel):
-    user: str
-    location: str
-    datetime: str
-    status: str
-    comment: str
-
-
-class PackageInfoItem(BaseModel):
-    code: str
-    content: str
-    records: list[RecordItem]
 
 
 router = APIRouter(prefix='/api/package', tags=['package'])
@@ -52,23 +29,20 @@ def get_package_info(code: str = None, full: bool = False):
         records = Record.get_records_of_package(package.id)
         records.sort(key=lambda rec: rec.id)
         if records:
-            records = [RecordItem(
-                user=UserDB.get_user_by_id(rec.user_id).name,
-                location=rec.location,
-                datetime=rec.datetime)
+            records = [convert_record(rec)
                 for rec in records]
-    return PackageInfoItem(code=package.code, content=package.content, records=records)
+    return ResponseModel.PackageInfoItem(code=package.code, content=package.content, records=records,signed=package.signed,posted=package.posted)
 
 
 @router.post('/add', dependencies=[Depends(get_userID)])
-def add_package(item: NewPackageItem):
+def add_package(item: RequestModel.NewPackageItem):
     if Package.check_package_exits(item.code):
         raise HTTPException(400, '包裹码已经存在!')
     return Package.add_package(item.code, item.content)
 
 
 @router.post('/transfer')
-def transfer_package(item: NewTransferItem, user_id:int= Depends(get_userID)):
+def transfer_package(item: RequestModel.NewTransferItem, user_id:int= Depends(get_userID)):
     package = Package.get_package_by_code(item.package_code)
     if not package:
         raise HTTPException(400, "没有找到相应的包裹!")
@@ -81,7 +55,7 @@ def transfer_package(item: NewTransferItem, user_id:int= Depends(get_userID)):
     if item.signed:
         if not Package.set_package_signed(item.package_code):
             raise HTTPException(400, '签收包裹失败!')
-    return record
+    return convert_record(record)
 
 
 def check_package_code(code):
@@ -90,7 +64,7 @@ def check_package_code(code):
 
 
 @router.post('/post')
-def post_package(item: NewPostItem, user_id:int=Depends(get_userID)):
+def post_package(item: RequestModel.NewPostItem, user_id:int=Depends(get_userID)):
     check_package_code(item.package_code)
 
     if not item.package_content:
@@ -116,4 +90,4 @@ def post_package(item: NewPostItem, user_id:int=Depends(get_userID)):
 
     if not Package.set_package_posted(package.code):
         raise HTTPException(400, '设置包裹为发出状态失败!')
-    return
+    return convert_record(record)
