@@ -71,6 +71,7 @@ watch(package_code,async (new_code,old_code)=>{
         return
     }
     const package_info=await get_package_info(new_code)
+    reset_all_inputs()
     if (package_info){
         package_content.value=package_info.content    
         return
