@@ -101,6 +101,7 @@ async function try_sign_up(){
     justify-content: center;
     align-items: center;
     width: 100%;
+    height: 100%;
 }
 .login-box{
     display: grid;

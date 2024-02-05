@@ -26,6 +26,8 @@ watch(package_code, async (new_code) => {
             package_info.value = await get_package_info(new_code, true)
             if (!package_info.value) {
                 message.warning('未查询到包裹, 请确认包裹是否发出!')
+            }else{
+                package_info.value.records.reverse()
             }
         } catch (error) {
             message.error('获取包裹信息失败:' + error)
@@ -67,10 +69,10 @@ function map_last_record_status(package_info:PackageInfo){
     if ((!package_info?.records) || package_info.records.length==0 )return 'error'
     return map_record_status(package_info.records[package_info.records.length-1])
 }
-function get_last_record_status(package_info:PackageInfo){
-    if ((!package_info?.records) || package_info.records.length==0 )return ''
-    return package_info.records[package_info.records.length-1].status
-}
+// function get_last_record_status(package_info:PackageInfo){
+//     if ((!package_info?.records) || package_info.records.length==0 )return ''
+//     return package_info.records[package_info.records.length-1].status
+// }
 
 </script>
 
@@ -81,14 +83,18 @@ function get_last_record_status(package_info:PackageInfo){
                 <n-input :status="code_state" v-model:value="package_code" placeholder="请输入包裹码或者扫码"></n-input>
                 <n-button type="primary" @click="show_scanner = true">扫码</n-button>
             </n-input-group>
-            <n-card :title="package_info?.content" size="small" v-if="!!package_info">
+            <h2>{{ package_info?.content }}</h2>
+            <!-- <n-card :title="package_info?.content" size="small" v-if="!!package_info">
                 <n-tag :type="map_package_status(package_info)">{{ get_package_statue(package_info)}}</n-tag>
                 <n-tag :type="map_last_record_status(package_info)">{{ get_last_record_status(package_info)}}</n-tag>
-            </n-card>
+            </n-card> -->
 
         </div>
         <div class="records-info">
             <n-timeline>
+                <n-timeline-item v-if="package_info" :type="map_last_record_status(package_info)">
+                    <n-tag :type="map_package_status(package_info)">{{ get_package_statue(package_info)}}</n-tag>
+                </n-timeline-item>
                 <n-timeline-item v-for="record in package_info?.records" :type="map_record_status(record)"
                     :title="record.location" :time="record.datetime">
                     <n-collapse>

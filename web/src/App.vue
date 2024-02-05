@@ -48,7 +48,7 @@ onMounted(async ()=>{
 .container{
   display: grid;
   justify-content: center;
-  align-items: center;
+  align-items: start;
   grid-template-rows: auto 1fr;
   height: 100%;
   width: 100%;

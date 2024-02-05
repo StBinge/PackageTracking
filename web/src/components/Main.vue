@@ -5,10 +5,11 @@ const router=useRouter()
 
 <template>
 <div class="menu-container">
-    <button @click="router.push({name:'info'})">查看包裹</button>
-    <button @click="router.push({name:'transfer',params:{'mode':'post'}})">发送包裹</button>
-    <button @click="router.push({name:'transfer',params:{'mode':'transfer'}})">中转包裹</button>
-    <!-- <button>签收包裹</button> -->
+    <n-button size="large" type="primary" @click="router.push({name:'coder'})">生成包裹码</n-button>
+    <n-button size="large" type="primary" @click="router.push({name:'info'})">查看包裹</n-button>
+    <n-button size="large" type="primary" @click="router.push({name:'transfer',params:{'mode':'post'}})">发送包裹</n-button>
+    <n-button size="large" type="primary" @click="router.push({name:'transfer',params:{'mode':'transfer'}})">中转包裹</n-button>
+    
 </div>
 </template>
 
@@ -19,5 +20,6 @@ const router=useRouter()
     justify-content: center;
     align-items: stretch;
     row-gap: 10px;
+    height: 100%;
 }
 </style>

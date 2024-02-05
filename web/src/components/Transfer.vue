@@ -71,7 +71,7 @@ watch(package_code,async (new_code,old_code)=>{
         return
     }
     const package_info=await get_package_info(new_code)
-    reset_all_inputs()
+    reset_all_inputs(false)
     if (package_info){
         package_content.value=package_info.content    
         return
@@ -124,7 +124,12 @@ async function try_transfer_package(){
                     package_status:package_status.value,
                     signed:package_signed.value
                 })
-                message.success('中转包裹成功!')
+                if (package_signed.value){
+                    message.success('签收包裹成功!')
+                }else{
+
+                    message.success('中转包裹成功!')
+                }
                 reset_all_inputs()
             } catch (error) {
                 message.warning('中转包裹失败:'+error)
@@ -136,8 +141,10 @@ async function try_transfer_package(){
     }
 }
 
-function reset_all_inputs(){
-    package_code.value=''
+function reset_all_inputs(reset_code=true){
+    if (reset_code){
+        package_code.value=''
+    }
     package_content.value=''
     package_comment.value=''
     package_status.value=''

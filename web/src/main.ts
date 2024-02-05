@@ -30,6 +30,12 @@ const routes=[
     name:'info',
     component:()=>import('@/components/PackageInfo.vue'),
 }
+,
+{
+    path:'/coder',
+    name:'coder',
+    component:()=>import('@/components/Coder.vue'),
+}
 ]
 const pinia=createPinia()
 const router=createRouter({
